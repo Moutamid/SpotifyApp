@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private SpotifyAppRemote mSpotifyAppRemote;
     private SharedPreferences.Editor editor;
     private SharedPreferences msharedPreferences;
-
+    String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,41 +56,12 @@ public class MainActivity extends AppCompatActivity {
         builder.setShowDialog(true);
         AuthorizationRequest request = builder.build();
 
-        /**
-         ConnectionParams connectionParams =
-                new ConnectionParams.Builder(CLIENT_ID)
-                        .setRedirectUri(REDIRECT_URI)
-                        .showAuthView(true)
-                        .build();
+        token = Stash.getString("token", "");
+        if (!token.isEmpty()){
+            startActivity(new Intent(MainActivity.this, ArtistActivity.class));
+            finish();
+        }
 
-        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
-
-        SpotifyAppRemote.connect(this, connectionParams,
-                new Connector.ConnectionListener() {
-
-                    @Override
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                        mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("MainActivity12", "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
-                        if (spotifyAppRemote.isConnected()){
-                            startActivity(new Intent(MainActivity.this, TestingActivity.class));
-                            finish();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Log.e("MainActivity12", throwable.getMessage(), throwable);
-                        if (throwable instanceof NotLoggedInException || throwable instanceof UserNotAuthorizedException) {
-                            // Show login button and trigger the login flow from auth library when clicked
-                        } else if (throwable instanceof CouldNotFindSpotifyApp) {
-                            // Show button to download Spotify
-                        }
-                    }
-                });
-        */
 
         findViewById(R.id.login).setOnClickListener(v -> AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request));
 
@@ -105,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("STARTING", "GOT USER INFORMATION");
             // We use commit instead of apply because we need the information stored immediately
             editor.commit();
-            startActivity(new Intent(MainActivity.this, TestingActivity.class));
+            startActivity(new Intent(MainActivity.this, ArtistActivity.class));
         });
     }
 
@@ -143,6 +114,42 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        /**
+         ConnectionParams connectionParams =
+         new ConnectionParams.Builder(CLIENT_ID)
+         .setRedirectUri(REDIRECT_URI)
+         .showAuthView(true)
+         .build();
+
+         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+
+         SpotifyAppRemote.connect(this, connectionParams,
+         new Connector.ConnectionListener() {
+
+        @Override
+        public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+        mSpotifyAppRemote = spotifyAppRemote;
+        Log.d("MainActivity12", "Connected! Yay!");
+
+        // Now you can start interacting with App Remote
+        if (spotifyAppRemote.isConnected()){
+        startActivity(new Intent(MainActivity.this, ArtistActivity.class));
+        finish();
+        }
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+        Log.e("MainActivity12", throwable.getMessage(), throwable);
+        if (throwable instanceof NotLoggedInException || throwable instanceof UserNotAuthorizedException) {
+        // Show login button and trigger the login flow from auth library when clicked
+        } else if (throwable instanceof CouldNotFindSpotifyApp) {
+        // Show button to download Spotify
+        }
+        }
+        });
+         */
 
     }
 

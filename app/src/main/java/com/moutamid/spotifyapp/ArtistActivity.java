@@ -1,28 +1,27 @@
 package com.moutamid.spotifyapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fxn.stash.Stash;
+import com.moutamid.spotifyapp.adapters.ArtistsAdapter;
+import com.moutamid.spotifyapp.listners.ArtistClickListen;
+import com.moutamid.spotifyapp.models.ArtistModel;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp;
 import com.spotify.android.appremote.api.error.NotLoggedInException;
 import com.spotify.android.appremote.api.error.UserNotAuthorizedException;
-import com.spotify.protocol.client.CallResult;
-import com.spotify.protocol.types.LibraryState;
-import com.spotify.protocol.types.Track;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,65 +30,48 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.PlaylistsPager;
 
-public class TestingActivity extends AppCompatActivity {
+public class ArtistActivity extends AppCompatActivity {
 
-    private TextView userView;
-    private TextView songView;
-    private Button addBtn;
-    private Song song;
+    RecyclerView rc;
+    EditText editText;
+    Button search;
+    ArrayList<ArtistModel> list;
+    ArtistModel model;
+    ArtistsAdapter adapter;
     private SpotifyAppRemote mSpotifyAppRemote;
-    private SongService songService;
-    private ArrayList<Song> recentlyPlayedTracks;
     private static final String REDIRECT_URI = "spotify-app:/oauth";
     private String CLIENT_ID, token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_testing);
+        setContentView(R.layout.activity_artist);
 
-        songService = new SongService(getApplicationContext());
-        addBtn = (Button) findViewById(R.id.add);
+        rc = findViewById(R.id.rc);
+        editText = findViewById(R.id.editText);
+        search = findViewById(R.id.search);
+
+        rc.setLayoutManager(new LinearLayoutManager(this));
+        rc.setHasFixedSize(false);
 
         CLIENT_ID = getResources().getString(R.string.CLIENT_ID);
 
         token = Stash.getString("token");
         Log.d("Artists", token);
 
-        SharedPreferences sharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
-        // userView.setText(sharedPreferences.getString("userid", "No User"));
+        list = new ArrayList<>();
 
-        // getTracks();
-
-        addBtn.setOnClickListener(v -> {
-            EditText ee = findViewById(R.id.editText);
-            SearchSpotifyTask task = new SearchSpotifyTask();
-            task.execute(ee.getText().toString());
+        search.setOnClickListener(v -> {
+            if (editText.getText().toString().isEmpty()){
+                Toast.makeText(this, "Please Provide A Name", Toast.LENGTH_SHORT).show();
+            } else {
+                new SearchSpotifyTask(this).execute(editText.getText().toString());
+//                rc.getAdapter().notifyDataSetChanged();
+            }
         });
-    }
 
-    private View.OnClickListener addListener = v -> {
-        songService.addSongToLibrary(this.song);
-        if (recentlyPlayedTracks.size() > 0) {
-            recentlyPlayedTracks.remove(0);
-        }
-        updateSong();
-    };
 
-    private void getTracks() {
-        songService.getRecentlyPlayedTracks(() -> {
-            recentlyPlayedTracks = songService.getSongs();
-            updateSong();
-        });
-    }
-
-    private void updateSong() {
-        if (recentlyPlayedTracks.size() > 0) {
-            songView.setText(recentlyPlayedTracks.get(0).getName());
-            song = recentlyPlayedTracks.get(0);
-        }
     }
 
     @Override
@@ -113,7 +95,7 @@ public class TestingActivity extends AppCompatActivity {
 
                         // Now you can start interacting with App Remote
                         if (spotifyAppRemote.isConnected()){
-                            Toast.makeText(TestingActivity.this, "connected", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ArtistActivity.this, "connected", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -134,22 +116,55 @@ public class TestingActivity extends AppCompatActivity {
         super.onStop();
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
-    
+
     public class SearchSpotifyTask extends AsyncTask<String, String, String> {
+        ArtistActivity artistActivity;
+
+        public SearchSpotifyTask(ArtistActivity artistActivity) {
+            this.artistActivity = artistActivity;
+        }
+
         @Override
         protected String doInBackground(String... strings) {
             SpotifyApi api = new SpotifyApi();
             api.setAccessToken(token);
+            /*if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }*/
+            // Toast.makeText(ArtistActivity.this, strings[0], Toast.LENGTH_SHORT).show();
             SpotifyService service = api.getService();
-            ArtistsPager results = service.searchArtists("Sean Paul");
+            ArtistsPager results = service.searchArtists(strings[0]);
             List<Artist> artists = results.artists.items;
-            for (int i = 0; i < artists.size(); i++) {
-                Artist artist = artists.get(i);
-                // Paul
-                Log.i("Artists", i + " " + artist.images);
-            }
+            list.clear();
+            runOnUiThread(() -> {
+                for (int i = 0; i < artists.size(); i++) {
+                    Artist artist = artists.get(i);
+                    // Paul
+                    if(artist.images.size() > 0 && artist.genres.size() > 0){
+                        model = new ArtistModel(artist.id, artist.images.get(0).url, artist.name, artist.genres.get(0), artist.followers.total);
+                    } else {
+                        model = new ArtistModel(artist.id, "", artist.name, artist.type, artist.followers.total);
+                    }
+                    list.add(model);
+                    adapter = new ArtistsAdapter(ArtistActivity.this, list, clickListen);
+                    rc.setAdapter(adapter);
+                }
+            });
+
             return null;
         }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
     }
+
+    ArtistClickListen clickListen = new ArtistClickListen() {
+        @Override
+        public void onClick(ArtistModel model) {
+            Toast.makeText(ArtistActivity.this, model.getName() + "\n" + model.getId(), Toast.LENGTH_SHORT).show();
+        }
+    };
 
 }
