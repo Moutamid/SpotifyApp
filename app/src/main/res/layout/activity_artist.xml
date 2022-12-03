@@ -6,12 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".ArtistActivity">
 
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25sp"
+        android:layout_marginStart="25sp"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:text="Add up-to 4 Artist" />
+
     <EditText
         android:id="@+id/editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="25sp"
         android:background="@drawable/et_bg"
+        android:layout_below="@id/title"
         android:padding="12dp"
         android:hint="Search Artist By Name" />
 
@@ -19,18 +30,40 @@
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search"
+        android:layout_below="@id/editText"
         android:layout_marginStart="25sp"
         android:layout_marginEnd="25sp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/et_bg"
-        android:layout_below="@id/editText" />
+        android:text="Search" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/chips"
+        android:layout_below="@id/search"
+        android:layout_marginStart="25sp"
+        android:layout_marginEnd="25sp"
+        android:layout_marginBottom="12dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/artist_card"
-        android:layout_below="@id/search" />
+        android:layout_above="@id/next"
+        android:layout_below="@id/chips" />
+
+    <Button
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="25sp"
+        android:layout_marginEnd="25sp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/et_bg"
+        android:text="Next" />
 
 </RelativeLayout>

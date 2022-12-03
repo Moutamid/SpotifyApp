@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
@@ -14,7 +16,9 @@ import android.widget.Toast;
 
 import com.fxn.stash.Stash;
 import com.moutamid.spotifyapp.adapters.ArtistsAdapter;
+import com.moutamid.spotifyapp.adapters.ChipsAdapter;
 import com.moutamid.spotifyapp.listners.ArtistClickListen;
+import com.moutamid.spotifyapp.listners.ChipsClick;
 import com.moutamid.spotifyapp.models.ArtistModel;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
@@ -33,15 +37,19 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 public class ArtistActivity extends AppCompatActivity {
 
-    RecyclerView rc;
+    RecyclerView rc, chipRC;
     EditText editText;
-    Button search;
+    Button search, next;
     ArrayList<ArtistModel> list;
-    ArtistModel model;
+    ArrayList<ArtistModel> chips;
+    ArtistModel model, chipsModel;
     ArtistsAdapter adapter;
+    ChipsAdapter chipsAdapter;
     private SpotifyAppRemote mSpotifyAppRemote;
     private static final String REDIRECT_URI = "spotify-app:/oauth";
     private String CLIENT_ID, token;
+    int limit = 0;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +57,21 @@ public class ArtistActivity extends AppCompatActivity {
         setContentView(R.layout.activity_artist);
 
         rc = findViewById(R.id.rc);
+        chipRC = findViewById(R.id.chips);
         editText = findViewById(R.id.editText);
         search = findViewById(R.id.search);
+        next = findViewById(R.id.next);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setTitle("Please Wait...");
+        progressDialog.setMessage("Fetching All the Artists");
 
         rc.setLayoutManager(new LinearLayoutManager(this));
         rc.setHasFixedSize(false);
+
+        chipRC.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        chipRC.setHasFixedSize(false);
 
         CLIENT_ID = getResources().getString(R.string.CLIENT_ID);
 
@@ -61,11 +79,20 @@ public class ArtistActivity extends AppCompatActivity {
         Log.d("Artists", token);
 
         list = new ArrayList<>();
+        chips = new ArrayList<>();
+
+        chipsModel = new ArtistModel();
+
+        next.setOnClickListener(v -> {
+            Stash.put("selectedArtists", chips);
+            startActivity(new Intent(this, PlayListActivity.class));
+        });
 
         search.setOnClickListener(v -> {
             if (editText.getText().toString().isEmpty()){
                 Toast.makeText(this, "Please Provide A Name", Toast.LENGTH_SHORT).show();
             } else {
+                progressDialog.show();
                 new SearchSpotifyTask(this).execute(editText.getText().toString());
 //                rc.getAdapter().notifyDataSetChanged();
             }
@@ -157,14 +184,36 @@ public class ArtistActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            progressDialog.dismiss();
         }
     }
+
+    ChipsClick chipsClick = new ChipsClick() {
+        @Override
+        public void onClick(int position) {
+            --limit;
+            chips.remove(position);
+            chipsAdapter.notifyItemRemoved(position);
+        }
+    };
 
     ArtistClickListen clickListen = new ArtistClickListen() {
         @Override
         public void onClick(ArtistModel model) {
-            Toast.makeText(ArtistActivity.this, model.getName() + "\n" + model.getId(), Toast.LENGTH_SHORT).show();
+            chipsModel = model;
+            if (limit < 4){
+                ++limit;
+                addChips();
+            } else {
+                Toast.makeText(ArtistActivity.this, "4 Artist already selected", Toast.LENGTH_SHORT).show();
+            }
         }
     };
+
+    private void addChips() {
+        chips.add(chipsModel);
+        chipsAdapter = new ChipsAdapter(ArtistActivity.this, chips, chipsClick);
+        chipRC.setAdapter(chipsAdapter);
+    }
 
 }

@@ -17,9 +17,11 @@
         android:theme="@style/Theme.SpotifyApp"
         tools:targetApi="31">
         <activity
+            android:name=".PlayListActivity"
+            android:exported="false" />
+        <activity
             android:name=".ArtistActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".TestingActivity"
             android:exported="false" />
@@ -42,7 +44,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <receiver
