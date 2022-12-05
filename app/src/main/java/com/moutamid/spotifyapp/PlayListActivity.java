@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +35,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -57,9 +60,10 @@ public class PlayListActivity extends AppCompatActivity {
     private SpotifyAppRemote mSpotifyAppRemote;
     private static final String REDIRECT_URI = "spotify-app:/oauth";
     private String CLIENT_ID, token;
-    ProgressDialog progressDialog;
+    ProgressDialog progressDialog, pd;
     ArrayList<String> songslist;
     ArrayList<SongModel> songs;
+    ArrayList<SongModel> sortedSongs;
     SongAdapter adapter;
     RecyclerView rc;
     Button sort, create;
@@ -80,6 +84,11 @@ public class PlayListActivity extends AppCompatActivity {
         progressDialog.setTitle("Please Wait...");
         progressDialog.setMessage("Creating A Playlist");
 
+        pd = new ProgressDialog(this);
+        pd.setCancelable(false);
+        pd.setTitle("Please Wait...");
+        pd.setMessage("Creating A Playlist In Spotify");
+
         rc = findViewById(R.id.songRC);
         songs = new ArrayList<>();
         sort = findViewById(R.id.sort);
@@ -90,14 +99,42 @@ public class PlayListActivity extends AppCompatActivity {
 
         selectedArtists = new ArrayList<>();
         songslist = new ArrayList<>();
+        sortedSongs = new ArrayList<>();
         selectedArtists = Stash.getArrayList("selectedArtists", ArtistModel.class);
 
         CLIENT_ID = getResources().getString(R.string.CLIENT_ID);
 
         token = Stash.getString("token");
-        Log.d("Artists", token);
+        Log.d("token12", token);
 
         requestQueue = VolleySingleton.getmInstance(PlayListActivity.this).getRequestQueue();
+
+        sort.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                for (SongModel s: songs) {
+                    Log.d("token12", "Songs : " + s.getKey());
+                }
+                songs.sort(Comparator.comparing(SongModel::getKey));
+                sortedSongs = songs;
+                //Collections.reverse(sortedSongs);
+                for (SongModel s: sortedSongs) {
+                    Log.d("token12", "Sorted : " + s.getKey());
+                }
+                Stash.put("Sorted", sortedSongs);
+                adapter = new SongAdapter(PlayListActivity.this, sortedSongs);
+                rc.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        create.setOnClickListener(v -> {
+            if(sortedSongs.size()>0){
+                pd.show();
+                new AddPlayListTask().execute("");
+            } else {
+                Toast.makeText(this, "Please Sort the Songs First", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
@@ -145,6 +182,48 @@ public class PlayListActivity extends AppCompatActivity {
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
+    public class AddPlayListTask extends AsyncTask<String, String, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            SpotifyApi api = new SpotifyApi();
+            api.setAccessToken(token);
+
+            SpotifyService service = api.getService();
+            UserPrivate user = service.getMe();
+
+            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> query = new HashMap<>();
+            Map<String, Object> body = new HashMap<>();
+
+            map.put("name", "MyPlaylist");
+            map.put("public", false);
+            map.put("collaborative", false);
+            map.put("description", "MyPlaylist");
+
+            String queries = "";
+
+            query.put("position", 0);
+            body.put("position", 0);
+
+            for (int i =0; i<sortedSongs.size(); i++){
+                queries = queries + "spotify:track:" + sortedSongs.get(i).getTrackID() + ",";
+                query.put("uris", queries);
+            }
+            SnapshotId addtrack = service.addTracksToPlaylist(user.id, sortedSongs.get(0).getPlaylistID(), query, query);
+            Log.d("Tracks", addtrack.snapshot_id);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            pd.dismiss();
+            Toast.makeText(getApplicationContext(), "Playlist Added Successfully", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), ArtistActivity.class));
+            finish();
+        }
+    }
+
     public class SearchSpotifyTask extends AsyncTask<String, String, String> {
 
         @Override
@@ -176,7 +255,7 @@ public class PlayListActivity extends AppCompatActivity {
             Playlist playlist = service.createPlaylist(user.id, map);
             Track track;
 
-            for (int i=0; i< selectedArtists.size(); i++) {
+            for (int i=0; i<selectedArtists.size(); i++) {
                 Log.d("Checking12", "for i: " + i);
                 Tracks tracks = service.getArtistTopTrack(selectedArtists.get(i).getId(), user.country);
                 List<Track> trackslist = tracks.tracks;
