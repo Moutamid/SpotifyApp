@@ -6,21 +6,54 @@
     android:layout_height="match_parent"
     tools:context=".ArtistActivity">
 
-    <TextView
+    <androidx.cardview.widget.CardView
         android:id="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25sp"
-        android:layout_marginStart="25sp"
-        android:textSize="18sp"
-        android:textColor="@color/black"
-        android:text="Add up-to 4 Artist" />
+        android:layout_height="?attr/actionBarSize"
+        app:cardCornerRadius="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:text="Add up-to 4 Artists"
+                android:textColor="@color/black"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:layout_centerVertical="true"
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/next"
+                style="@style/Widget.Material3.Button.ElevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="6dp"
+                android:backgroundTint="@color/grey"
+                android:drawableLeft="@drawable/ic_playlist"
+                android:drawableTint="@color/black"
+                android:text="Create Playlist"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
 
     <EditText
         android:id="@+id/editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="25sp"
+        android:layout_marginStart="25sp"
+        android:layout_marginEnd="25sp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="25sp"
         android:background="@drawable/et_bg"
         android:layout_below="@id/title"
         android:padding="12dp"
@@ -28,42 +61,32 @@
 
     <Button
         android:id="@+id/search"
+        style="@style/Widget.Material3.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/editText"
         android:layout_marginStart="25sp"
         android:layout_marginEnd="25sp"
         android:layout_marginBottom="12dp"
-        android:background="@drawable/et_bg"
-        android:text="Search" />
+        android:text="Search"
+        android:textSize="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/chips"
         android:layout_below="@id/search"
         android:layout_marginStart="25sp"
         android:layout_marginEnd="25sp"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="12dp"
+        tools:listitem="@layout/chips" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/artist_card"
-        android:layout_above="@id/next"
         android:layout_below="@id/chips" />
 
-    <Button
-        android:id="@+id/next"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="25sp"
-        android:layout_marginEnd="25sp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/et_bg"
-        android:text="Next" />
 
 </RelativeLayout>

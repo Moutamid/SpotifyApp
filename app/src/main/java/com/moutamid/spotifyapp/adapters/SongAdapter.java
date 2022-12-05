@@ -38,7 +38,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongVH> {
     public void onBindViewHolder(@NonNull SongVH holder, int position) {
         SongModel model = list.get(holder.getAdapterPosition());
 
-        Glide.with(context).load(model.getImage()).placeholder(R.drawable.profile_icon).into(holder.imageView);
+        Glide.with(context).load(model.getImage()).placeholder(R.drawable.music).into(holder.imageView);
         holder.type.setText("Type : " + model.getType());
         holder.name.setText(model.getName());
         String s = "";

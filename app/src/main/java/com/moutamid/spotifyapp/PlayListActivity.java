@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -32,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +154,9 @@ public class PlayListActivity extends AppCompatActivity {
                 Looper.prepare();
             }*/
             // Toast.makeText(ArtistActivity.this, strings[0], Toast.LENGTH_SHORT).show();
+
+            Log.d("Checking12", "Async");
+
             SpotifyService service = api.getService();
             UserPrivate user = service.getMe();
             Map<String, Object> map = new HashMap<>();
@@ -171,18 +176,27 @@ public class PlayListActivity extends AppCompatActivity {
             Track track;
 
             for (int i=0; i< selectedArtists.size(); i++) {
+                Log.d("Checking12", "for i: " + i);
                 Tracks tracks = service.getArtistTopTrack(selectedArtists.get(i).getId(), user.country);
                 List<Track> trackslist = tracks.tracks;
                 for (int j=0; j < trackslist.size(); j++) {
                     track = trackslist.get(j);
-                    String url = "https://api.getsongbpm.com/song/?api_key=35a177f0197792725c4d047c987c60d2&id=" + track.id;
+                    Log.d("Checking12", "for : j" + j);
+                    String url = "https://api.getsongbpm.com/song/?api_key=35a177f0197792725c4d047c987c60d2&id=" + "8qz8Nj";
+                    Log.d("Checking12", "track ID : " + track.id);
+                    Log.d("Checking12", "URL : " + url);
                     Track finalTrack = track;
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                     response -> {
                         try {
+                            // 28EkxM2v1o3V5o4tz8wPWH
+
+                            Log.d("Checking12", "JSON");
                             JSONObject object = response.getJSONObject("song");
-                            String key = object.getString("camelot");
-                            String image = object.getString("img");
+                            String key = object.getString("open_key");
+
+                            Log.d("Checking12", "JSON OBJ : " + key);
+
                             Toast.makeText(PlayListActivity.this, key + "\n" + finalTrack.id, Toast.LENGTH_SHORT).show();
                             songs.add(new SongModel(user.id, user.country, finalTrack.id, playlist.id, key, finalTrack.name, finalTrack.type, "", finalTrack.artists));
                         } catch (Exception e){
@@ -190,7 +204,7 @@ public class PlayListActivity extends AppCompatActivity {
                         }
                     },
                     error -> {
-                        Log.d(TAG, "doInBackground: " + error.getMessage());
+                        Log.d("Checking12", "doInBackground: " + error.getMessage());
                     });
                     requestQueue.add(jsonObjectRequest);
                     runOnUiThread(() -> {
@@ -200,8 +214,8 @@ public class PlayListActivity extends AppCompatActivity {
                     /*queries = queries + "spotify:track:" + track.id + ",";
                     query.put("uris", queries);*/
                 }
-                /*SnapshotId addtrack = service.addTracksToPlaylist(user.id, playlist.id, query, query);
-                Log.d("Tracks", addtrack.snapshot_id);*/
+                /* SnapshotId addtrack = service.addTracksToPlaylist(user.id, playlist.id, query, query);
+                Log.d("Tracks", addtrack.snapshot_id); */
             }
 
             return null;

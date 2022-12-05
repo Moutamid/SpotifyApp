@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">Spotify App</string>
-
     <string name="CLIENT_ID">3f4b431e044a4c289b8503a352e620b5</string>
-    <string name="CLIENT_SECRET">1f5c8320d0a44e779894275499d6fad1</string>
-
 </resources>

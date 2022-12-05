@@ -3,6 +3,7 @@ package com.moutamid.spotifyapp;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -70,7 +71,8 @@ public class ArtistActivity extends AppCompatActivity {
         rc.setLayoutManager(new LinearLayoutManager(this));
         rc.setHasFixedSize(false);
 
-        chipRC.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+//        chipRC.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        chipRC.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.HORIZONTAL));
         chipRC.setHasFixedSize(false);
 
         CLIENT_ID = getResources().getString(R.string.CLIENT_ID);
@@ -84,8 +86,12 @@ public class ArtistActivity extends AppCompatActivity {
         chipsModel = new ArtistModel();
 
         next.setOnClickListener(v -> {
-            Stash.put("selectedArtists", chips);
-            startActivity(new Intent(this, PlayListActivity.class));
+            if (chips.size() > 0){
+                Stash.put("selectedArtists", chips);
+                startActivity(new Intent(this, PlayListActivity.class));
+            } else {
+                Toast.makeText(this, "Please Select At Least 1 Artist", Toast.LENGTH_SHORT).show();
+            }
         });
 
         search.setOnClickListener(v -> {
