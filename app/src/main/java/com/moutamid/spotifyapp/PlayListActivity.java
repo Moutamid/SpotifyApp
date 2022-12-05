@@ -33,7 +33,12 @@ import com.spotify.android.appremote.api.error.UserNotAuthorizedException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -275,10 +280,29 @@ public class PlayListActivity extends AppCompatActivity {
                         }
                     }
 //                  https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:Rude+Boy+artist:Rihanna
-                    String url = "https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:" + name + "+artist:" + artist;
+//                  String url = "https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:" + name + "+artist:" + artist;
+                    String url = "https://songdata.io/track/" + track.id;
                     Log.d("Checking12", "track ID : " + track.id);
                     Log.d("Checking12", "URL : " + url);
-                    Track finalTrack = track;
+
+                    try {
+                        Document doc = Jsoup.connect(url).get();
+                        Elements nodes = doc.getElementsByClass("py-1");
+                        Element content = nodes.get(3);
+                        Element value = content.child(1);
+                        Log.d("Checking12", "Html" + value.text().toString());
+                        songs.add(new SongModel(user.id, user.country, track.id, playlist.id, value.text().toString(), track.name, track.type, "", track.artists));
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            adapter = new SongAdapter(PlayListActivity.this, songs);
+                            rc.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    /*Track finalTrack = track;
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                     response -> {
                         try {
@@ -304,7 +328,7 @@ public class PlayListActivity extends AppCompatActivity {
                     error -> {
                         Log.d("Checking12", "doInBackground: " + error.getMessage());
                     });
-                    requestQueue.add(jsonObjectRequest);
+                    requestQueue.add(jsonObjectRequest);*/
                     /*queries = queries + "spotify:track:" + track.id + ",";
                     query.put("uris", queries);*/
                 }
@@ -318,12 +342,7 @@ public class PlayListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            if (songs.size()>0){
-                progressDialog.dismiss();
-            } else {
-                progressDialog.dismiss();
-                // Toast.makeText(PlayListActivity.this, "Something Went Wrong", Toast.LENGTH_SHORT).show();
-            }
+            progressDialog.dismiss();
         }
     }
 

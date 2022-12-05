@@ -57,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
         AuthorizationRequest request = builder.build();
 
         token = Stash.getString("token", "");
-        if (!token.isEmpty()){
-            startActivity(new Intent(MainActivity.this, ArtistActivity.class));
-            finish();
-        }
+//        if (!token.isEmpty()){
+//            startActivity(new Intent(MainActivity.this, ArtistActivity.class));
+//            finish();
+//        }
 
 
         findViewById(R.id.login).setOnClickListener(v -> AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request));
