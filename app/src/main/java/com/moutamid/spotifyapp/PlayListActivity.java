@@ -29,6 +29,7 @@ import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp;
 import com.spotify.android.appremote.api.error.NotLoggedInException;
 import com.spotify.android.appremote.api.error.UserNotAuthorizedException;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -182,7 +183,20 @@ public class PlayListActivity extends AppCompatActivity {
                 for (int j=0; j < trackslist.size(); j++) {
                     track = trackslist.get(j);
                     Log.d("Checking12", "for : j" + j);
-                    String url = "https://api.getsongbpm.com/song/?api_key=35a177f0197792725c4d047c987c60d2&id=" + "8qz8Nj";
+                    // Rude+Boy+artist:Rihanna
+                    String name = track.name;
+                    String artist="";
+                    if (name.contains(" ")){
+                        name = name.replace(" ", "+");
+                    }
+                    if (track.artists.size() > 0){
+                        artist = track.artists.get(0).name;
+                        if (artist.contains(" ")){
+                            artist = artist.replace(" ", "+");
+                        }
+                    }
+//                  https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:Rude+Boy+artist:Rihanna
+                    String url = "https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:" + name + "+artist:" + artist;
                     Log.d("Checking12", "track ID : " + track.id);
                     Log.d("Checking12", "URL : " + url);
                     Track finalTrack = track;
@@ -192,13 +206,18 @@ public class PlayListActivity extends AppCompatActivity {
                             // 28EkxM2v1o3V5o4tz8wPWH
 
                             Log.d("Checking12", "JSON");
-                            JSONObject object = response.getJSONObject("song");
-                            String key = object.getString("open_key");
+                            JSONArray object = response.getJSONArray("search");
+                            String key = object.getJSONObject(0).getString("open_key");
 
                             Log.d("Checking12", "JSON OBJ : " + key);
 
-                            Toast.makeText(PlayListActivity.this, key + "\n" + finalTrack.id, Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(PlayListActivity.this, key + "\n" + finalTrack.id, Toast.LENGTH_SHORT).show();
                             songs.add(new SongModel(user.id, user.country, finalTrack.id, playlist.id, key, finalTrack.name, finalTrack.type, "", finalTrack.artists));
+                            runOnUiThread(() -> {
+                                adapter = new SongAdapter(PlayListActivity.this, songs);
+                                rc.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
+                            });
                         } catch (Exception e){
                             e.printStackTrace();
                         }
@@ -207,10 +226,6 @@ public class PlayListActivity extends AppCompatActivity {
                         Log.d("Checking12", "doInBackground: " + error.getMessage());
                     });
                     requestQueue.add(jsonObjectRequest);
-                    runOnUiThread(() -> {
-                        adapter = new SongAdapter(PlayListActivity.this, songs);
-                        rc.setAdapter(adapter);
-                    });
                     /*queries = queries + "spotify:track:" + track.id + ",";
                     query.put("uris", queries);*/
                 }
@@ -224,7 +239,12 @@ public class PlayListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            progressDialog.dismiss();
+            if (songs.size()>0){
+                progressDialog.dismiss();
+            } else {
+                progressDialog.dismiss();
+                // Toast.makeText(PlayListActivity.this, "Something Went Wrong", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

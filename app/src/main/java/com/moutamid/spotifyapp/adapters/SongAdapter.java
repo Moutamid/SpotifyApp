@@ -42,8 +42,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongVH> {
         holder.type.setText("Type : " + model.getType());
         holder.name.setText(model.getName());
         String s = "";
-        for (int i =0; i < model.getArtistList().size(); i++){
-            s = s + model.getArtistList().get(i).name + ",";
+        for (int i=0; i < model.getArtistList().size(); i++){
+            if (i==0){
+                s = s + model.getArtistList().get(i).name;
+            } else {
+                s = s + model.getArtistList().get(i).name + ", ";
+            }
         }
         holder.artist.setText("Artists : " + s);
 
@@ -61,7 +65,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongVH> {
             super(itemView);
             imageView = itemView.findViewById(R.id.profileImage);
             name = itemView.findViewById(R.id.name);
-            artist = itemView.findViewById(R.id.followers);
+            artist = itemView.findViewById(R.id.artist);
             type = itemView.findViewById(R.id.type);
         }
     }
