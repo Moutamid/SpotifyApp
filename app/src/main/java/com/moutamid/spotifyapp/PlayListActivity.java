@@ -125,12 +125,8 @@ public class PlayListActivity extends AppCompatActivity {
         });
 
         create.setOnClickListener(v -> {
-            if(sortedSongs.size()>0){
-                pd.show();
-                new AddPlayListTask().execute("");
-            } else {
-                Toast.makeText(this, "Please Sort the Songs First", Toast.LENGTH_SHORT).show();
-            }
+            pd.show();
+            new AddPlayListTask().execute("");
         });
 
     }
@@ -255,12 +251,23 @@ public class PlayListActivity extends AppCompatActivity {
             query.put("position", 0);
             body.put("position", 0);
 
-            for (int i =0; i<sortedSongs.size(); i++){
-                queries = queries + "spotify:track:" + sortedSongs.get(i).getTrackID() + ",";
-                query.put("uris", queries);
+            if (sortedSongs.size()>0){
+                for (int i =0; i<sortedSongs.size(); i++){
+                    queries = queries + "spotify:track:" + sortedSongs.get(i).getTrackID() + ",";
+                    query.put("uris", queries);
+                }
+                SnapshotId addtrack = service.addTracksToPlaylist(user.id, sortedSongs.get(0).getPlaylistID(), query, query);
+                Log.d("Tracks", addtrack.snapshot_id);
+            } else {
+                for (int i =0; i<songs.size(); i++){
+                    queries = queries + "spotify:track:" + songs.get(i).getTrackID() + ",";
+                    query.put("uris", queries);
+                }
+                SnapshotId addtrack = service.addTracksToPlaylist(user.id, songs.get(0).getPlaylistID(), query, query);
+                Log.d("Tracks", addtrack.snapshot_id);
             }
-            SnapshotId addtrack = service.addTracksToPlaylist(user.id, sortedSongs.get(0).getPlaylistID(), query, query);
-            Log.d("Tracks", addtrack.snapshot_id);
+
+
             return null;
         }
 
