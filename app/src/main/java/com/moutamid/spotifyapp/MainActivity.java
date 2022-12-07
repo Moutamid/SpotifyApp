@@ -31,7 +31,7 @@ import com.spotify.sdk.android.auth.AuthorizationResponse;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 1337;
-    private static final String REDIRECT_URI = "spotify-app:/oauth";
+    private static final String REDIRECT_URI = "com.moutamid.spotifyapp://callback";
     private String CLIENT_ID;
     private static final String SCOPES = "user-read-recently-played,user-library-modify,user-read-email,user-read-private,user-top-read,user-follow-read,streaming,app-remote-control,playlist-read-private,playlist-read-collaborative,playlist-modify-private,playlist-modify-public,user-follow-modify,user-modify-playback-state,user-read-playback-state";
     private RequestQueue queue;
@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private SharedPreferences msharedPreferences;
     String token;
+    AuthorizationRequest request;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +51,12 @@ public class MainActivity extends AppCompatActivity {
         msharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
         queue = Volley.newRequestQueue(this);
 
-        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
+        AuthorizationRequest.Builder builder =
+                new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
 
         builder.setScopes(new String[]{SCOPES});
         builder.setShowDialog(true);
-        AuthorizationRequest request = builder.build();
+        request = builder.build();
 
         token = Stash.getString("token", "");
 //        if (!token.isEmpty()){
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-   /*@Override
+   @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Uri uri = intent.getData();
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 case TOKEN:
                     // Handle successful response
                     Stash.put("token", response.getAccessToken());
-                    Log.d("STARTING", "GOT AUTH TOKEN");
+                    Log.d("response", "GOT AUTH TOKEN");
                     editor = getSharedPreferences("SPOTIFY", 0).edit();
                     editor.putString("token", response.getAccessToken());
                     editor.apply();
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     // Handle other cases
             }
         }
-    }*/
+    }
 
     @Override
     protected void onStart() {

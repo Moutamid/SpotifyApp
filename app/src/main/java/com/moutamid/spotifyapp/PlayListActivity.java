@@ -6,13 +6,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -76,7 +83,6 @@ public class PlayListActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
 
     // 35a177f0197792725c4d047c987c60d2
-
     // https://api.getsongbpm.com/song/?api_key=35a177f0197792725c4d047c987c60d2&id=983pB
 
     @Override
@@ -115,6 +121,29 @@ public class PlayListActivity extends AppCompatActivity {
         requestQueue = VolleySingleton.getmInstance(PlayListActivity.this).getRequestQueue();
 
         sort.setOnClickListener(v -> {
+            show();
+        });
+
+        create.setOnClickListener(v -> {
+            if(sortedSongs.size()>0){
+                pd.show();
+                new AddPlayListTask().execute("");
+            } else {
+                Toast.makeText(this, "Please Sort the Songs First", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void show() {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.sort_in);
+
+        Button asc = dialog.findViewById(R.id.asc);
+        Button dsc = dialog.findViewById(R.id.dsc);
+
+        asc.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 for (SongModel s: songs) {
                     Log.d("token12", "Songs : " + s.getKey());
@@ -130,17 +159,33 @@ public class PlayListActivity extends AppCompatActivity {
                 rc.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
             }
+            dialog.cancel();
         });
 
-        create.setOnClickListener(v -> {
-            if(sortedSongs.size()>0){
-                pd.show();
-                new AddPlayListTask().execute("");
-            } else {
-                Toast.makeText(this, "Please Sort the Songs First", Toast.LENGTH_SHORT).show();
+        dsc.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                for (SongModel s: songs) {
+                    Log.d("token12", "Songs : " + s.getKey());
+                }
+                songs.sort(Comparator.comparing(SongModel::getKey).reversed());
+                sortedSongs = songs;
+                //Collections.reverse(sortedSongs);
+                for (SongModel s: sortedSongs) {
+                    Log.d("token12", "Sorted : " + s.getKey());
+                }
+                Stash.put("Sorted", sortedSongs);
+                adapter = new SongAdapter(PlayListActivity.this, sortedSongs);
+                rc.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
             }
+            dialog.cancel();
         });
 
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setGravity(Gravity.CENTER);
     }
 
     @Override
