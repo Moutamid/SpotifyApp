@@ -132,6 +132,7 @@ public class PlayListActivity extends AppCompatActivity {
                 throw new RuntimeException("Test Crash"); // Force a crash
             } else {
                 Toast.makeText(this, "No Song Found! Fetching in the background Please Wait.", Toast.LENGTH_SHORT).show();
+                recreate();
             }
         });
     }
