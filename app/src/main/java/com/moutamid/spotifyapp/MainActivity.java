@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
 
-        findViewById(R.id.login).setOnClickListener(v -> AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request));
+        findViewById(R.id.login).setOnClickListener(v -> AuthorizationClient.openLoginInBrowser(this, request));
 
     }
 
@@ -116,43 +116,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        /**
-         ConnectionParams connectionParams =
-         new ConnectionParams.Builder(CLIENT_ID)
-         .setRedirectUri(REDIRECT_URI)
-         .showAuthView(true)
-         .build();
-
-         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
-
-         SpotifyAppRemote.connect(this, connectionParams,
-         new Connector.ConnectionListener() {
-
-        @Override
-        public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-        mSpotifyAppRemote = spotifyAppRemote;
-        Log.d("MainActivity12", "Connected! Yay!");
-
-        // Now you can start interacting with App Remote
-        if (spotifyAppRemote.isConnected()){
-        startActivity(new Intent(MainActivity.this, ArtistActivity.class));
-        finish();
-        }
-        }
-
-        @Override
-        public void onFailure(Throwable throwable) {
-        Log.e("MainActivity12", throwable.getMessage(), throwable);
-        if (throwable instanceof NotLoggedInException || throwable instanceof UserNotAuthorizedException) {
-        // Show login button and trigger the login flow from auth library when clicked
-        } else if (throwable instanceof CouldNotFindSpotifyApp) {
-        // Show button to download Spotify
-        }
-        }
-        });
-         */
-
     }
 
     private void connected() {
