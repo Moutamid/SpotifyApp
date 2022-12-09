@@ -11,7 +11,7 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
-        setProperty("archivesBaseName", "SpotifyApp-$versionName")
+        setProperty("archivesBaseName", "VibeCheck-$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,6 +39,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.14.2'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
     implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'com.github.MohamedWessam:no-internet-layout:0.1.1'
 
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'

@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -27,6 +30,9 @@ import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
+import com.wessam.library.LayoutImage;
+import com.wessam.library.NetworkChecker;
+import com.wessam.library.NoInternetLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,11 +46,14 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences msharedPreferences;
     String token;
     AuthorizationRequest request;
+    Button login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        login = findViewById(R.id.login);
 
         CLIENT_ID = getResources().getString(R.string.CLIENT_ID);
 
@@ -58,15 +67,22 @@ public class MainActivity extends AppCompatActivity {
         builder.setShowDialog(true);
         request = builder.build();
 
+        login.setOnClickListener(v -> AuthorizationClient.openLoginInBrowser(this, request));
+
         token = Stash.getString("token", "");
 //        if (!token.isEmpty()){
 //            startActivity(new Intent(MainActivity.this, ArtistActivity.class));
 //            finish();
 //        }
 
-
-        findViewById(R.id.login).setOnClickListener(v -> AuthorizationClient.openLoginInBrowser(this, request));
-
+        /*if (!NetworkChecker.isNetworkConnected(this)){
+            //Toast.makeText(this, "h", Toast.LENGTH_SHORT).show();
+            new NoInternetLayout.Builder(this, R.layout.activity_main)
+                    .animate()
+                    .mainTitle("No Internet!")
+                    .secondaryText("Please connect to the WiFi or Mobile Data.")
+                    .setImage(LayoutImage.SHELL);
+        }*/
     }
 
     private void waitForUserInfo() {
@@ -88,13 +104,14 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = intent.getData();
         if (uri != null) {
             AuthorizationResponse response = AuthorizationResponse.fromUri(uri);
-
+// BQB9eGj9cl45TTR8Nc1G-BdnPxQy1SZ3y_V28lEfaNpmXlY3LRhE4bsVfkR4Q0ZJ0j9KTir6ZNy3HWqOGH-Du-mlDYYpYUIOY2IDodyolW_hadtAU465ZRuEGTOEcwbQugu8iDQsYRRt6hztWaZgi5OxtpYXjXhn9Dho_ONm7iyLaHaiYIesftfgtfLRI7MjG7-R43LKKwayJWwuokuMTBPhqHgA_3AVNiqj2K11N941GADoG3KWyotMTsXQ0zwaBa7mOZ_JoQOR4aY-n6OBisywH2UQOU7eSm0ZCXN4rwsGKMe5tqCQ2cFKkkiB_w
             switch (response.getType()) {
                 // Response was successful and contains auth token
                 case TOKEN:
                     // Handle successful response
                     Stash.put("token", response.getAccessToken());
                     Log.d("response", "GOT AUTH TOKEN");
+                    Log.d("response", "TOKEN " + response.getAccessToken());
                     editor = getSharedPreferences("SPOTIFY", 0).edit();
                     editor.putString("token", response.getAccessToken());
                     editor.apply();

@@ -82,7 +82,7 @@ public class PlayListActivity extends AppCompatActivity {
 
     private RequestQueue requestQueue;
 
-    // 35a177f0197792725c4d047c987c60d2
+     // 35a177f0197792725c4d047c987c60d2
     // https://api.getsongbpm.com/song/?api_key=35a177f0197792725c4d047c987c60d2&id=983pB
 
     @Override
@@ -206,6 +206,7 @@ public class PlayListActivity extends AppCompatActivity {
                         // Now you can start interacting with App Remote
                         if (spotifyAppRemote.isConnected()){
                             progressDialog.show();
+                            Log.d("token12", "Connected! Yay!");
                             new SearchSpotifyTask().execute("");
                         }
                     }
@@ -266,8 +267,6 @@ public class PlayListActivity extends AppCompatActivity {
                 SnapshotId addtrack = service.addTracksToPlaylist(user.id, songs.get(0).getPlaylistID(), query, query);
                 Log.d("Tracks", addtrack.snapshot_id);
             }
-
-
             return null;
         }
 
@@ -293,6 +292,7 @@ public class PlayListActivity extends AppCompatActivity {
             // Toast.makeText(ArtistActivity.this, strings[0], Toast.LENGTH_SHORT).show();
 
             Log.d("Checking12", "Async");
+            Log.d("token12", "Checking12");
 
             SpotifyService service = api.getService();
             UserPrivate user = service.getMe();
@@ -313,12 +313,12 @@ public class PlayListActivity extends AppCompatActivity {
             Track track;
 
             for (int i=0; i<selectedArtists.size(); i++) {
-                Log.d("Checking12", "for i: " + i);
+                Log.d("token12", "for i: " + i);
                 Tracks tracks = service.getArtistTopTrack(selectedArtists.get(i).getId(), user.country);
                 List<Track> trackslist = tracks.tracks;
                 for (int j=0; j < trackslist.size(); j++) {
                     track = trackslist.get(j);
-                    Log.d("Checking12", "for : j" + j);
+                    Log.d("token12", "for : j" + j);
                     // Rude+Boy+artist:Rihanna
                     String name = track.name;
                     String artist="";
@@ -334,15 +334,15 @@ public class PlayListActivity extends AppCompatActivity {
 //                  https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:Rude+Boy+artist:Rihanna
 //                  String url = "https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:" + name + "+artist:" + artist;
                     String url = "https://songdata.io/track/" + track.id;
-                    Log.d("Checking12", "track ID : " + track.id);
-                    Log.d("Checking12", "URL : " + url);
+                    Log.d("token12", "track ID : " + track.id);
+                    Log.d("token12", "URL : " + url);
 
                     try {
                         Document doc = Jsoup.connect(url).get();
                         Elements nodes = doc.getElementsByClass("py-1");
                         Element content = nodes.get(3);
                         Element value = content.child(1);
-                        Log.d("Checking12", "Html" + value.text().toString());
+                        Log.d("token12", "Html" + value.text().toString());
                         songs.add(new SongModel(user.id, user.country, track.id, playlist.id, value.text().toString(), track.name, track.type, "", track.artists));
                         runOnUiThread(() -> {
                             progressDialog.dismiss();
