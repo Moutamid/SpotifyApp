@@ -122,13 +122,18 @@ public class PlayListActivity extends AppCompatActivity {
 
         sort.setOnClickListener(v -> {
             show();
+            throw new RuntimeException("Test Crash"); // Force a crash
         });
 
         create.setOnClickListener(v -> {
-            pd.show();
-            new AddPlayListTask().execute("");
+            if(songs.size() > 0) {
+                pd.show();
+                new AddPlayListTask().execute("");
+                throw new RuntimeException("Test Crash"); // Force a crash
+            } else {
+                Toast.makeText(this, "No Song Found! Fetching in the background Please Wait.", Toast.LENGTH_SHORT).show();
+            }
         });
-
     }
 
     private void show() {
@@ -193,7 +198,7 @@ public class PlayListActivity extends AppCompatActivity {
                         .showAuthView(true)
                         .build();
 
-        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+        // SpotifyAppRemote.disconnect(mSpotifyAppRemote);
 
         SpotifyAppRemote.connect(this, connectionParams,
                 new Connector.ConnectionListener() {
@@ -208,6 +213,7 @@ public class PlayListActivity extends AppCompatActivity {
                             progressDialog.show();
                             Log.d("token12", "Connected! Yay!");
                             new SearchSpotifyTask().execute("");
+                            throw new RuntimeException("Test Crash"); // Force a crash
                         }
                     }
 
@@ -216,8 +222,52 @@ public class PlayListActivity extends AppCompatActivity {
                         Log.e("MainActivity12", throwable.getMessage(), throwable);
                         if (throwable instanceof NotLoggedInException || throwable instanceof UserNotAuthorizedException) {
                             // Show login button and trigger the login flow from auth library when clicked
+                            throw new RuntimeException("Test Crash"); // Force a crash
                         } else if (throwable instanceof CouldNotFindSpotifyApp) {
                             // Show button to download Spotify
+                            throw new RuntimeException("Test Crash"); // Force a crash
+                        }
+                    }
+                });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ConnectionParams connectionParams =
+                new ConnectionParams.Builder(CLIENT_ID)
+                        .setRedirectUri(REDIRECT_URI)
+                        .showAuthView(true)
+                        .build();
+
+        // SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+
+        SpotifyAppRemote.connect(this, connectionParams,
+                new Connector.ConnectionListener() {
+
+                    @Override
+                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+                        mSpotifyAppRemote = spotifyAppRemote;
+                        Log.d("MainActivity12", "Connected! Yay!");
+
+                        // Now you can start interacting with App Remote
+                        if (spotifyAppRemote.isConnected()){
+                            progressDialog.show();
+                            Log.d("token12", "Connected! Yay!");
+                            new SearchSpotifyTask().execute("");
+                            throw new RuntimeException("Test Crash"); // Force a crash
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        Log.e("MainActivity12", throwable.getMessage(), throwable);
+                        if (throwable instanceof NotLoggedInException || throwable instanceof UserNotAuthorizedException) {
+                            // Show login button and trigger the login flow from auth library when clicked
+                            throw new RuntimeException("Test Crash"); // Force a crash
+                        } else if (throwable instanceof CouldNotFindSpotifyApp) {
+                            // Show button to download Spotify
+                            throw new RuntimeException("Test Crash"); // Force a crash
                         }
                     }
                 });
@@ -325,7 +375,7 @@ public class PlayListActivity extends AppCompatActivity {
                     if (name.contains(" ")){
                         name = name.replace(" ", "+");
                     }
-                    if (track.artists.size() > 0){
+                    if (track.artists.size() > 0) {
                         artist = track.artists.get(0).name;
                         if (artist.contains(" ")){
                             artist = artist.replace(" ", "+");
@@ -352,6 +402,7 @@ public class PlayListActivity extends AppCompatActivity {
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
+                        throw new RuntimeException("Test Crash"); // Force a crash
                     }
 
                     /*Track finalTrack = track;
