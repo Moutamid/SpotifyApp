@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences msharedPreferences;
     String token;
     AuthorizationRequest request;
-    Button login;
+    Button login, loginBro;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         login = findViewById(R.id.login);
+        loginBro = findViewById(R.id.loginBro);
 
         CLIENT_ID = getResources().getString(R.string.CLIENT_ID);
 
@@ -67,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setShowDialog(true);
         request = builder.build();
 
-        login.setOnClickListener(v -> AuthorizationClient.openLoginInBrowser(this, request));
+        loginBro.setOnClickListener(v -> AuthorizationClient.openLoginInBrowser(this, request));
+        login.setOnClickListener(v -> AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request));
 
         token = Stash.getString("token", "");
 //        if (!token.isEmpty()){
