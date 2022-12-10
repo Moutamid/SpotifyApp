@@ -120,16 +120,25 @@ public class PlayListActivity extends AppCompatActivity {
 
         requestQueue = VolleySingleton.getmInstance(PlayListActivity.this).getRequestQueue();
 
+
+        try{
+            progressDialog.show();
+            Log.d("token12", "Connected! Yay!");
+            new SearchSpotifyTask().execute("");
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Test Crash"); // Force a crash
+        }
+
         sort.setOnClickListener(v -> {
             show();
-            throw new RuntimeException("Test Crash"); // Force a crash
         });
 
         create.setOnClickListener(v -> {
             if(songs.size() > 0) {
                 pd.show();
                 new AddPlayListTask().execute("");
-                throw new RuntimeException("Test Crash"); // Force a crash
+//                throw new RuntimeException("Test Crash"); // Force a crash
             } else {
                 Toast.makeText(this, "No Song Found! Fetching in the background Please Wait.", Toast.LENGTH_SHORT).show();
                 recreate();
@@ -190,7 +199,7 @@ public class PlayListActivity extends AppCompatActivity {
         dialog.getWindow().setGravity(Gravity.CENTER);
     }
 
-    @Override
+/*    @Override
     protected void onStart() {
         super.onStart();
         ConnectionParams connectionParams =
@@ -256,7 +265,7 @@ public class PlayListActivity extends AppCompatActivity {
                             progressDialog.show();
                             Log.d("token12", "Connected! Yay!");
                             new SearchSpotifyTask().execute("");
-                            throw new RuntimeException("Test Crash"); // Force a crash
+                            // throw new RuntimeException("Test Crash"); // Force a crash
                         }
                     }
 
@@ -272,12 +281,12 @@ public class PlayListActivity extends AppCompatActivity {
                         }
                     }
                 });
-    }
+    }*/
 
     @Override
     protected void onStop() {
         super.onStop();
-        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+        // SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
     public class AddPlayListTask extends AsyncTask<String, String, String> {
@@ -309,14 +318,14 @@ public class PlayListActivity extends AppCompatActivity {
                     query.put("uris", queries);
                 }
                 SnapshotId addtrack = service.addTracksToPlaylist(user.id, sortedSongs.get(0).getPlaylistID(), query, query);
-                Log.d("Tracks", addtrack.snapshot_id);
+                Log.d("token12", addtrack.snapshot_id);
             } else {
                 for (int i =0; i<songs.size(); i++){
                     queries = queries + "spotify:track:" + songs.get(i).getTrackID() + ",";
                     query.put("uris", queries);
                 }
                 SnapshotId addtrack = service.addTracksToPlaylist(user.id, songs.get(0).getPlaylistID(), query, query);
-                Log.d("Tracks", addtrack.snapshot_id);
+                Log.d("token12", "Tracks : " + addtrack.snapshot_id);
             }
             return null;
         }
@@ -371,19 +380,10 @@ public class PlayListActivity extends AppCompatActivity {
                     track = trackslist.get(j);
                     Log.d("token12", "for : j" + j);
                     // Rude+Boy+artist:Rihanna
-                    String name = track.name;
-                    String artist="";
-                    if (name.contains(" ")){
-                        name = name.replace(" ", "+");
-                    }
-                    if (track.artists.size() > 0) {
-                        artist = track.artists.get(0).name;
-                        if (artist.contains(" ")){
-                            artist = artist.replace(" ", "+");
-                        }
-                    }
+
 //                  https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:Rude+Boy+artist:Rihanna
 //                  String url = "https://api.getsongbpm.com/search/?api_key=35a177f0197792725c4d047c987c60d2&type=both&lookup=song:" + name + "+artist:" + artist;
+
                     String url = "https://songdata.io/track/" + track.id;
                     Log.d("token12", "track ID : " + track.id);
                     Log.d("token12", "URL : " + url);
@@ -393,8 +393,9 @@ public class PlayListActivity extends AppCompatActivity {
                         Elements nodes = doc.getElementsByClass("py-1");
                         Element content = nodes.get(3);
                         Element value = content.child(1);
-                        Log.d("token12", "Html" + value.text().toString());
-                        songs.add(new SongModel(user.id, user.country, track.id, playlist.id, value.text().toString(), track.name, track.type, "", track.artists));
+                        Log.d("token12", "Html " + value.text().toString());
+                        Log.d("token12", "Preview URL " + track.album.images.get(0).url);
+                        songs.add(new SongModel(user.id, user.country, track.id, playlist.id, value.text().toString(), track.name, track.type, track.album.images.get(0).url, track.artists));
                         runOnUiThread(() -> {
                             progressDialog.dismiss();
                             adapter = new SongAdapter(PlayListActivity.this, songs);
