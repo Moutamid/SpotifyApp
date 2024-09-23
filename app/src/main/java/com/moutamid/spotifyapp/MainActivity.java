@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 1337;
     private static final String REDIRECT_URI = "com.moutamid.spotifyapp://callback";
     private String CLIENT_ID;
-    private static final String SCOPES = "user-read-recently-played,user-library-modify,user-read-email,user-read-private,user-top-read,user-follow-read,streaming,app-remote-control,playlist-read-private,playlist-read-collaborative,playlist-modify-private,playlist-modify-public,user-follow-modify,user-modify-playback-state,user-read-playback-state";
+    public static final String SCOPES = "user-read-recently-played,user-library-modify,user-read-email,user-read-private,user-top-read,user-follow-read,streaming,app-remote-control,playlist-read-private,playlist-read-collaborative,playlist-modify-private,playlist-modify-public,user-follow-modify,user-modify-playback-state,user-read-playback-state";
     private RequestQueue queue;
     private SpotifyAppRemote mSpotifyAppRemote;
     private SharedPreferences.Editor editor;
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Constants.checkApp(this);
 
         login = findViewById(R.id.login);
         loginBro = findViewById(R.id.loginBro);
